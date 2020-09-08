@@ -1,4 +1,4 @@
-package com.example.stock_stalker
+package com.example.MarketHub
 
 import io.flutter.embedding.android.FlutterActivity
 

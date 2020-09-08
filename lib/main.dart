@@ -1,16 +1,21 @@
+import 'package:MarketHub/pages/page_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'page_earnings.dart';
-import 'page_news.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'pages/page_earnings.dart';
+import 'pages/page_news.dart';
 import 'trading_apps.dart';
-import 'page_popular.dart';
+import 'pages/page_popular.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:stock_stalker/page_earnings.dart';
+import 'package:MarketHub/pages/page_earnings.dart';
 
-void main() {
+void main() async {
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
   ));
+  WidgetsFlutterBinding.ensureInitialized();
+  BlocSupervisor.delegate = await HydratedBlocDelegate.build();
   runApp(MyApp());
 }
 
@@ -18,15 +23,31 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      themeMode: ThemeMode.system,
+      // light theme
       theme: ThemeData(
+        brightness: Brightness.light,
         primarySwatch: Colors.teal,
+        accentColor: Colors.teal,
+        selectedRowColor: Colors.white,
+        fontFamily: 'Montserrat',
+        textTheme: TextTheme(
+          headline1: TextStyle(
+            fontSize: 18.0,
+            color: Colors.white,
+            fontWeight: FontWeight.normal,
+          ),
+        ),
+        iconTheme: IconThemeData(color: Colors.white),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      themeMode: ThemeMode.dark,
+      // dark theme
       darkTheme: ThemeData(
-          brightness: Brightness.dark,
-          primarySwatch: Colors.teal,
-          accentColor: Colors.teal),
+        brightness: Brightness.dark,
+        primarySwatch: Colors.teal,
+        accentColor: Colors.teal,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
       debugShowCheckedModeBanner: false,
       home: MyHomePage(),
     );
@@ -46,7 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
     Center(child: Text("Low Float")),
     EarningsPage(),
     NewsPage(),
-    Center(child: Text("Settings"))
+    SettingsPage(),
   ];
 
   @override

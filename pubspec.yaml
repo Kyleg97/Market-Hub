@@ -1,4 +1,4 @@
-name: stock_stalker
+name: MarketHub
 description: A new Flutter project.
 
 # The following line prevents the package from being accidentally published to
@@ -29,14 +29,13 @@ dependencies:
   flutter_appavailability: ^0.0.21
   url_launcher: ^5.5.0
   pull_to_refresh: ^1.6.1
-  bloc: ^0.7.8
-  flutter_bloc: ^0.4.12
   shared_preferences: ^0.4.3
   flutter_icons: ^1.1.0
   intl: ^0.16.1
-  scroll_app_bar: ^1.0.2
   cached_network_image: ^2.2.0+1
-  floating_action_bubble: ^1.0.9
+  hydrated_bloc: ^3.0.0
+  flutter_bloc: ^3.2.0
+  equatable: ^1.1.1
 
 dev_dependencies:
   flutter_test:

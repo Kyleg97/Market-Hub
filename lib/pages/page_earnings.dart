@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:stock_stalker/api_earnings.dart';
+import 'package:MarketHub/api/api_earnings.dart';
 import 'package:intl/intl.dart';
 
 class EarningsPage extends StatefulWidget {
@@ -34,6 +34,8 @@ class EarningsPageState extends State<EarningsPage> {
   final NumberFormat volumeFormatter = new NumberFormat("#,##0", "en_US");
 
   final DateFormat datetimeFormatter = new DateFormat('MM/dd/yyyy hh:mm a');
+
+  DateTime currentDate;
 
   void _onRefresh() async {
     await callEarnings();
@@ -99,34 +101,43 @@ class EarningsPageState extends State<EarningsPage> {
         : Scaffold(
             appBar: AppBar(
               actions: [
-                DropdownButton<CustomDropDownItem>(
-                  hint: Text("Sort By"),
-                  value: _currentDropdownValue,
-                  onChanged: (CustomDropDownItem value) {
-                    setState(() {
-                      _currentDropdownValue = value;
-                      sort(value);
-                      _scrollController.animateTo(0.0,
-                          curve: Curves.easeOut,
-                          duration: const Duration(milliseconds: 300));
-                    });
-                  },
-                  items: _customDropdownItems.map((CustomDropDownItem item) {
-                    return DropdownMenuItem<CustomDropDownItem>(
-                      value: item,
-                      child: Row(
-                        children: <Widget>[
-                          item.icon,
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Text(
-                            item.word,
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
+                DropdownButtonHideUnderline(
+                  child: DropdownButton<CustomDropDownItem>(
+                    dropdownColor: Theme.of(context).accentColor,
+                    iconEnabledColor: Colors.white,
+                    hint: Text(
+                      "Sort By",
+                      textAlign: TextAlign.right,
+                      style: Theme.of(context).textTheme.headline1,
+                    ),
+                    value: _currentDropdownValue,
+                    onChanged: (CustomDropDownItem value) {
+                      setState(() {
+                        _currentDropdownValue = value;
+                        sort(value);
+                        _scrollController.animateTo(0.0,
+                            curve: Curves.easeOut,
+                            duration: const Duration(milliseconds: 300));
+                      });
+                    },
+                    items: _customDropdownItems.map((CustomDropDownItem item) {
+                      return DropdownMenuItem<CustomDropDownItem>(
+                        value: item,
+                        child: Row(
+                          children: <Widget>[
+                            item.icon,
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Text(
+                              item.word,
+                              style: Theme.of(context).textTheme.headline1,
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
                 ),
               ],
             ),
@@ -178,9 +189,10 @@ class EarningsPageState extends State<EarningsPage> {
                                       Align(
                                         alignment: Alignment.center,
                                         child: Card(
+                                          elevation: 5,
                                           margin: EdgeInsets.fromLTRB(
                                               15, 10, 15, 0),
-                                          color: Colors.black12,
+                                          color: Colors.white, //Colors.black12,
                                           child: Padding(
                                             padding: EdgeInsets.all(15),
                                             child: Column(
@@ -210,7 +222,9 @@ class EarningsPageState extends State<EarningsPage> {
                                         child: Card(
                                             margin: EdgeInsets.fromLTRB(
                                                 15, 10, 15, 0),
-                                            color: Colors.black12,
+                                            elevation: 5,
+                                            color:
+                                                Colors.white, //Colors.black12,
                                             child: Padding(
                                                 padding: EdgeInsets.all(15),
                                                 child: Column(
