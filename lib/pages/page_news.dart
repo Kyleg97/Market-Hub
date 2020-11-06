@@ -50,8 +50,11 @@ class NewsPageState extends State<NewsPage> {
     setState(() {});
   }*/
 
-  void callNews() {
+  void callNews() async {
     articles.clear();
+    articles = await News.fetchNews("hi");
+    setState(() {});
+    /*
     List<Article> tempList;
     newsSources.forEach((source) async {
       tempList = await News.fetchNews(source);
@@ -68,20 +71,22 @@ class NewsPageState extends State<NewsPage> {
       setState(() {});
       print("articles size: " + articles.length.toString());
     });
+    */
   }
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: SafeArea(
-        child: articles.isEmpty
-            ? CircularProgressIndicator()
-            : SmartRefresher(
-                enablePullDown: true,
-                header: WaterDropHeader(),
-                controller: _refreshController,
-                onRefresh: _onRefresh,
-                child: ListView.builder(
+        bottom: false,
+        child: SmartRefresher(
+          enablePullDown: true,
+          header: WaterDropHeader(),
+          controller: _refreshController,
+          onRefresh: _onRefresh,
+          child: articles.isEmpty
+              ? Center(child: CircularProgressIndicator())
+              : ListView.builder(
                   padding: const EdgeInsets.all(10),
                   itemCount: articles.length,
                   itemBuilder: (context, index) {
@@ -154,7 +159,7 @@ class NewsPageState extends State<NewsPage> {
                     );
                   },
                 ),
-              ),
+        ),
       ),
     );
   }

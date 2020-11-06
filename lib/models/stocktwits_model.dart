@@ -1,33 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-class StocktwitsTrending {
-  String symbol;
-  String name;
-  int watchlistCount;
-
-  StocktwitsTrending(this.symbol, this.name, this.watchlistCount);
-
-  static Future<List<StocktwitsTrending>> fetchStocktwitsTrending() async {
-    final response = await http
-        .get('https://api.stocktwits.com/api/2/trending/symbols.json');
-
-    //print("yup: " + response.body.toString());
-    //final decoded = json.decode(response.body);
-    //print(response.body.toString());
-    //print(decoded);
-    final parser = parserFromJson(response.body.toString());
-    // print(parser.symbols);
-    List<StocktwitsTrending> trending = new List();
-    parser.symbols.forEach((element) {
-      trending.add(new StocktwitsTrending(
-          element.symbol, element.title, element.watchlistCount));
-    });
-    trending.sort((b, a) => a.watchlistCount.compareTo(b.watchlistCount));
-    return trending;
-  }
-}
-
 Parser parserFromJson(String str) => Parser.fromJson(json.decode(str));
 
 String parserToJson(Parser data) => json.encode(data.toJson());
@@ -39,12 +12,12 @@ class Parser {
   });
 
   Response response;
-  List<Symbol> symbols;
+  List<StocktwitsModel> symbols;
 
   factory Parser.fromJson(Map<String, dynamic> json) => Parser(
         response: Response.fromJson(json["response"]),
-        symbols:
-            List<Symbol>.from(json["symbols"].map((x) => Symbol.fromJson(x))),
+        symbols: List<StocktwitsModel>.from(
+            json["symbols"].map((x) => StocktwitsModel.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
@@ -69,8 +42,8 @@ class Response {
       };
 }
 
-class Symbol {
-  Symbol({
+class StocktwitsModel {
+  StocktwitsModel({
     this.id,
     this.symbol,
     this.title,
@@ -86,7 +59,30 @@ class Symbol {
   bool isFollowing;
   int watchlistCount;
 
-  factory Symbol.fromJson(Map<String, dynamic> json) => Symbol(
+  static Future<List<StocktwitsModel>> fetchStocktwitsTrending() async {
+    final response = await http
+        .get('https://api.stocktwits.com/api/2/trending/symbols.json');
+
+    final parser = parserFromJson(response.body.toString());
+    List<StocktwitsModel> trending = new List();
+    parser.symbols.forEach((element) {
+      trending.add(
+        StocktwitsModel(
+          id: element.id,
+          symbol: element.symbol,
+          title: element.title,
+          aliases: element.aliases,
+          isFollowing: element.isFollowing,
+          watchlistCount: element.watchlistCount,
+        ),
+      );
+    });
+    trending.sort((b, a) => a.watchlistCount.compareTo(b.watchlistCount));
+    return trending;
+  }
+
+  factory StocktwitsModel.fromJson(Map<String, dynamic> json) =>
+      StocktwitsModel(
         id: json["id"],
         symbol: json["symbol"],
         title: json["title"],

@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 class RedditTrending {
   static Future<List<CommonTicker>> fetchRedditTrending() async {
     final response =
-        await http.get("http://kylelee.pythonanywhere.com/common_tickers");
+        await http.get("https://kylelee.pythonanywhere.com/common_tickers");
 
     final parser = parserFromJson(response.body.toString());
     List<CommonTicker> commonTickersList = new List();

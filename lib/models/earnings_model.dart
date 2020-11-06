@@ -1,24 +1,5 @@
 import 'dart:convert';
-import 'package:MarketHub/providers/earnings_provider.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
-
-class Earnings {
-  static Future<List<EarningsInfo>> fetchEarnings() async {
-    print("called");
-    final response =
-        await http.get("https://kylelee.pythonanywhere.com/earnings_info");
-
-    final parser = parserFromJson(response.body.toString());
-
-    List<EarningsInfo> earningsList = new List();
-    parser.earningsInfo.forEach((earningsInfo) {
-      earningsList.add(earningsInfo);
-    });
-    //print(parser.earningsInfo);
-    return earningsList;
-  }
-}
 
 Parser parserFromJson(String str) => Parser.fromJson(json.decode(str));
 
@@ -29,11 +10,11 @@ class Parser {
     this.earningsInfo,
   });
 
-  List<EarningsInfo> earningsInfo;
+  List<EarningsModel> earningsInfo;
 
   factory Parser.fromJson(Map<String, dynamic> json) => Parser(
-        earningsInfo: List<EarningsInfo>.from(
-            json["EarningsInfo"].map((x) => EarningsInfo.fromJson(x))),
+        earningsInfo: List<EarningsModel>.from(
+            json["EarningsInfo"].map((x) => EarningsModel.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
@@ -41,8 +22,8 @@ class Parser {
       };
 }
 
-class EarningsInfo {
-  EarningsInfo({
+class EarningsModel {
+  EarningsModel({
     this.companyName,
     this.currentVolume,
     this.earningsDatetime,
@@ -56,7 +37,20 @@ class EarningsInfo {
   double epsEstimate;
   String tickerName;
 
-  factory EarningsInfo.fromJson(Map<String, dynamic> json) => EarningsInfo(
+  static Future<List<EarningsModel>> fetchEarnings() async {
+    final response =
+        await http.get("https://kylelee.pythonanywhere.com/earnings_info");
+
+    final parser = parserFromJson(response.body.toString());
+
+    List<EarningsModel> earningsList = new List();
+    parser.earningsInfo.forEach((earningsInfo) {
+      earningsList.add(earningsInfo);
+    });
+    return earningsList;
+  }
+
+  factory EarningsModel.fromJson(Map<String, dynamic> json) => EarningsModel(
         companyName: json["company_name"],
         currentVolume: json["current_volume"],
         earningsDatetime: DateTime.parse(json["earnings_datetime"]),

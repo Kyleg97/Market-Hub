@@ -6,14 +6,19 @@ class News {
   static Future<List<Article>> fetchNews(String source) async {
     String newsKey = APIKeys.getNewsKey();
     final response = await http.get(
-      "https://newsapi.org/v2/top-headlines?sources=$source&apiKey=$newsKey",
+      //"https://newsapi.org/v2/top-headlines?sources=$source&apiKey=$newsKey"
+      "https://newsapi.org/v2/everything?q=stock-market&language=en&from=2020-09-14&to=2020-09-14&sortBy=popularity&apiKey=$newsKey",
     );
 
     final parser = parserFromJson(response.body.toString());
 
     List<Article> articlesList = new List();
     parser.articles.forEach((article) {
-      articlesList.add(article);
+      if (article.url != null &&
+          article.source != null &&
+          article.urlToImage != null) {
+        articlesList.add(article);
+      }
     });
     print(parser.totalResults);
     return articlesList;

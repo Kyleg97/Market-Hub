@@ -1,5 +1,8 @@
+import 'package:MarketHub/providers/stocktwits_provider.dart';
+import 'package:MarketHub/widgets/stocktwits_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:MarketHub/api/api_reddit.dart';
 import 'package:MarketHub/api/api_rhpopular.dart';
@@ -7,8 +10,7 @@ import 'package:MarketHub/api/api_stocktwits.dart';
 import 'package:MarketHub/trading_apps.dart';
 
 class PopularPage extends StatefulWidget {
-  final scrollController;
-  PopularPage({this.scrollController}) : super();
+  PopularPage() : super();
 
   @override
   PopularPageState createState() => PopularPageState();
@@ -22,7 +24,14 @@ class PopularPageState extends State<PopularPage> {
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
 
+  ScrollController _scrollController = new ScrollController();
+
   int _currentSource = 0; // 0 stocktwits, 1 reddit, 2 google, 3 yahoo, etc...
+
+  bool _isInit = true;
+  bool _isLoadingStocktwits = false;
+  bool _isLoadingReddit = false;
+  bool _isLoadingRobinhood = false;
 
   void _onRefresh() async {
     if (_currentSource == 0) {
@@ -42,6 +51,26 @@ class PopularPageState extends State<PopularPage> {
     callStocktwits();
     callReddit();
     callRobinhood();
+  }
+
+  @override
+  void didChangeDependencies() {
+    if (_isInit) {
+      setState(() {
+        _isLoadingStocktwits = true;
+        _isLoadingReddit = true;
+        _isLoadingRobinhood = true;
+      });
+      Provider.of<StocktwitsProvider>(context)
+          .fetchStocktwitsTrending()
+          .then((_) {
+        setState(() {
+          _isLoadingStocktwits = false;
+        });
+      });
+    }
+    _isInit = false;
+    super.didChangeDependencies();
   }
 
   @override
@@ -101,72 +130,90 @@ class PopularPageState extends State<PopularPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(actions: [
-        Container(
-          padding: EdgeInsets.fromLTRB(0, 10, 5, 10),
-          child: FlatButton(
-            onPressed: () {
-              setState(() {
-                _currentSource = 0;
-              });
-            },
-            child: Text(
-              "Stocktwits",
-              style: TextStyle(
-                  color: _currentSource == 0 ? Colors.teal : Colors.white),
-            ),
-            color: _currentSource == 0
-                ? Theme.of(context).selectedRowColor
-                : Colors.transparent,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      extendBody: true,
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).accentColor,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.elliptical(50, 20),
           ),
         ),
-        Container(
-          padding: EdgeInsets.fromLTRB(0, 10, 5, 10),
-          child: FlatButton(
-            onPressed: () {
-              setState(() {
-                _currentSource = 1;
-              });
-            },
-            child: Text(
-              "Reddit",
-              style: TextStyle(
-                  color: _currentSource == 1 ? Colors.teal : Colors.white),
+        actions: [
+          Container(
+            padding: EdgeInsets.fromLTRB(0, 10, 5, 10),
+            child: FlatButton(
+              onPressed: () {
+                setState(() {
+                  _currentSource = 0;
+                });
+              },
+              child: Text(
+                "Stocktwits",
+                style: TextStyle(
+                    color: _currentSource == 0 ? Colors.teal : Colors.white),
+              ),
+              color: _currentSource == 0
+                  ? Theme.of(context).selectedRowColor
+                  : Colors.transparent,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
             ),
-            color: _currentSource == 1
-                ? Theme.of(context).selectedRowColor
-                : Colors.transparent,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           ),
-        ),
-        Container(
-          padding: EdgeInsets.fromLTRB(0, 10, 5, 10),
-          child: FlatButton(
-            onPressed: () {
-              setState(() {
-                _currentSource = 2;
-              });
-            },
-            child: Text(
-              "Robinhood",
-              style: TextStyle(
-                  color: _currentSource == 2 ? Colors.teal : Colors.white),
+          Container(
+            padding: EdgeInsets.fromLTRB(0, 10, 5, 10),
+            child: FlatButton(
+              onPressed: () {
+                setState(() {
+                  _currentSource = 1;
+                });
+              },
+              child: Text(
+                "Reddit",
+                style: TextStyle(
+                    color: _currentSource == 1 ? Colors.teal : Colors.white),
+              ),
+              color: _currentSource == 1
+                  ? Theme.of(context).selectedRowColor
+                  : Colors.transparent,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
             ),
-            color: _currentSource == 2
-                ? Theme.of(context).selectedRowColor
-                : Colors.transparent,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           ),
-        ),
-      ]),
-      body: SafeArea(
-        child: stocktwitsTrending == null ||
-                redditTrending == null ||
-                robinhoodTrending == null
+          Container(
+            padding: EdgeInsets.fromLTRB(0, 10, 5, 10),
+            child: FlatButton(
+              onPressed: () {
+                setState(() {
+                  _currentSource = 2;
+                });
+              },
+              child: Text(
+                "Robinhood",
+                style: TextStyle(
+                    color: _currentSource == 2 ? Colors.teal : Colors.white),
+              ),
+              color: _currentSource == 2
+                  ? Theme.of(context).selectedRowColor
+                  : Colors.transparent,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
+            ),
+          ),
+        ],
+      ),
+      body: Container(
+        //bottom: false,
+        /*decoration: new BoxDecoration(
+          gradient: new LinearGradient(
+              colors: [Colors.teal[100], Colors.teal],
+              begin: const FractionalOffset(0.0, 0.5),
+              end: const FractionalOffset(0.5, 0.0),
+              //radius: 1.5,
+              stops: [0.0, 1.0],
+              tileMode: TileMode.clamp),
+        ),*/
+        child: stocktwitsTrending == null
             ? Center(child: CircularProgressIndicator())
             : _currentSource == 0
                 ? SmartRefresher(
@@ -174,41 +221,8 @@ class PopularPageState extends State<PopularPage> {
                     header: WaterDropHeader(),
                     controller: _refreshController,
                     onRefresh: _onRefresh,
-                    child: ListView.builder(
-                      controller: widget.scrollController,
-                      padding: const EdgeInsets.all(5),
-                      itemCount: stocktwitsTrending.length,
-                      itemBuilder: (context, index) {
-                        return Card(
-                          elevation: 10,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              ListTile(
-                                onTap: () {
-                                  TradingApps.installedApps.forEach((element) {
-                                    if (element["app_name"] == "Robinhood") {
-                                      leavingAppDialog(
-                                          stocktwitsTrending[index].symbol);
-                                      return;
-                                    }
-                                  });
-                                },
-                                title: Text(stocktwitsTrending[index].symbol),
-                                subtitle: Text(stocktwitsTrending[index].name),
-                                trailing: Text(
-                                  "Watchlist Count:\n" +
-                                      stocktwitsTrending[index]
-                                          .watchlistCount
-                                          .toString(),
-                                  textAlign: TextAlign.end,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
+                    child: StocktwitsListViewBuilder(
+                        scrollController: _scrollController),
                   )
                 : _currentSource == 1
                     ? SmartRefresher(
@@ -217,12 +231,15 @@ class PopularPageState extends State<PopularPage> {
                         controller: _refreshController,
                         onRefresh: _onRefresh,
                         child: ListView.builder(
-                          controller: widget.scrollController,
+                          controller: _scrollController,
                           padding: const EdgeInsets.all(5),
                           itemCount: redditTrending.length,
                           itemBuilder: (context, index) {
                             return Card(
-                              elevation: 10,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20.0),
+                              ),
+                              elevation: 5,
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -262,12 +279,15 @@ class PopularPageState extends State<PopularPage> {
                         controller: _refreshController,
                         onRefresh: _onRefresh,
                         child: ListView.builder(
-                          controller: widget.scrollController,
+                          controller: _scrollController,
                           padding: const EdgeInsets.all(5),
                           itemCount: robinhoodTrending.length,
                           itemBuilder: (context, index) {
                             return Card(
-                              elevation: 10,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20.0),
+                              ),
+                              elevation: 5,
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -303,6 +323,29 @@ class PopularPageState extends State<PopularPage> {
                         ),
                       ),
       ),
+    );
+  }
+}
+
+class StocktwitsListViewBuilder extends StatelessWidget {
+  const StocktwitsListViewBuilder({
+    Key key,
+    @required ScrollController scrollController,
+  })  : _scrollController = scrollController,
+        super(key: key);
+
+  final ScrollController _scrollController;
+
+  @override
+  Widget build(BuildContext context) {
+    final stocktwitsData = Provider.of<StocktwitsProvider>(context);
+    final stocktwitsTrending = stocktwitsData.items;
+    return ListView.builder(
+      controller: _scrollController,
+      padding: const EdgeInsets.all(5),
+      itemCount: stocktwitsTrending.length,
+      itemBuilder: (context, i) => StocktwitsCard(stocktwitsTrending[i].symbol,
+          stocktwitsTrending[i].title, stocktwitsTrending[i].watchlistCount),
     );
   }
 }

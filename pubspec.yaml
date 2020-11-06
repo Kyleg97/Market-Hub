@@ -26,16 +26,16 @@ dependencies:
 
   cupertino_icons: ^0.1.3
   http: ^0.12.2
-  flutter_appavailability: ^0.0.21
+  flutter_appavailability: ^0.0.21 # check for apps on device
   url_launcher: ^5.5.0
   pull_to_refresh: ^1.6.1
   shared_preferences: ^0.4.3
   flutter_icons: ^1.1.0
-  intl: ^0.16.1
+  intl: ^0.16.1 # format numbers/dates
   cached_network_image: ^2.2.0+1
-  hydrated_bloc: ^3.0.0
-  flutter_bloc: ^3.2.0
-  equatable: ^1.1.1
+  flutter_launcher_icons: ^0.7.5 # application icon
+  animated_bottom_navigation_bar: ^0.1.2+2
+  provider: ^4.3.2+2
 
 dev_dependencies:
   flutter_test:
@@ -69,7 +69,14 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
+  fonts:
+    - family: Bristone
+      fonts:
+        - asset: assets/fonts/Bristone.ttf
+    - family: Montserrat
+      fonts:
+        - asset: assets/fonts/Montserrat-Light.ttf
+          weight: 300
   #   - family: Schyler
   #     fonts:
   #       - asset: fonts/Schyler-Regular.ttf

@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 class RobinhoodTrending {
   static Future<List<RhPopular>> fetchRobinhoodTrending() async {
     final response =
-        await http.get("http://kylelee.pythonanywhere.com/robinhood_popular");
+        await http.get("https://kylelee.pythonanywhere.com/robinhood_popular");
 
     final parser = parserFromJson(response.body.toString());
     List<RhPopular> popularList = new List();
