@@ -1,7 +1,5 @@
 import 'dart:convert';
-import 'package:MarketHub/providers/earnings_provider.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
 
 class Earnings {
   static Future<List<EarningsInfo>> fetchEarnings() async {
