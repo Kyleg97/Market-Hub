@@ -86,7 +86,7 @@ class EarningsIPOPageState extends State<EarningsIPOPage> {
   /*callUpcomingIPO() async {
     ipos = await IPO.fetchUpcomingIPO();
     setState(() {});
-  }*/
+  }*/ /////
 
   Future<void> _refreshEarnings(BuildContext context) async {
     await Provider.of<EarningsProvider>(context, listen: false)
