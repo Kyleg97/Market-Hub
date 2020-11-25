@@ -12,12 +12,7 @@ class StocktwitsTrending {
     final response = await http
         .get('https://api.stocktwits.com/api/2/trending/symbols.json');
 
-    //print("yup: " + response.body.toString());
-    //final decoded = json.decode(response.body);
-    //print(response.body.toString());
-    //print(decoded);
     final parser = parserFromJson(response.body.toString());
-    // print(parser.symbols);
     List<StocktwitsTrending> trending = new List();
     parser.symbols.forEach((element) {
       trending.add(new StocktwitsTrending(
