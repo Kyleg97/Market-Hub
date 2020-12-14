@@ -119,4 +119,5 @@ app.*.symbols
 !/dev/ci/**/Gemfile.lock
 # Exceptions to above rules.
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
-lib/apikeys.dart
+frontend/lib/apikeys.dart
+backend/keys.py
