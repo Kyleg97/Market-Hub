@@ -34,7 +34,7 @@ for each in td_row_1:
     popular[ticker] = {
         "company": each.text,
         "price": price,
-        "market_cap": market_cap,
+        "market_cap": market_cap,how to remove a commit from github but keep local changes
         "volume": -1000 
     }
 
