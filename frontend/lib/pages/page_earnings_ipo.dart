@@ -227,7 +227,8 @@ class IpoListViewBuilder extends StatelessWidget {
       padding: const EdgeInsets.all(10),
       controller: _scrollController,
       itemCount: ipos.length,
-      itemBuilder: (context, i) => IpoItem(
+      itemBuilder: (context, i) => Container(),
+      /*itemBuilder: (context, i) => IpoItem(
         ipos[i].tickerName,
         ipos[i].companyName,
         ipos[i].date,
@@ -235,7 +236,7 @@ class IpoListViewBuilder extends StatelessWidget {
         ipos[i].priceRange,
         ipos[i].sharesNum,
         averageVolume,
-      ),
+      ),*/
     );
   }
 }
@@ -259,14 +260,16 @@ class EarningsListviewBuilder extends StatelessWidget {
       padding: const EdgeInsets.all(10),
       controller: _scrollController,
       itemCount: earnings.length,
-      itemBuilder: (context, i) => EarningItem(
+      itemBuilder: (context, i) =>
+          /*EarningItem(
         earnings[i].tickerName,
         earnings[i].companyName,
         earnings[i].currentVolume,
         earnings[i].epsEstimate,
         earnings[i].earningsDatetime,
         averageVolume,
-      ),
+      ),*/
+          Container(),
     );
   }
 }

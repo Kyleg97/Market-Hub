@@ -1,25 +1,25 @@
-class EarningsModel {
-  EarningsModel(
+class RobinhoodModel {
+  RobinhoodModel(
     this.company,
-    this.datetime,
-    this.epsEstimate,
+    this.marketCap,
+    this.price,
     this.ticker,
     this.volume,
   );
 
   String company;
-  String datetime;
-  String epsEstimate;
+  String marketCap;
+  String price;
   String ticker;
   int volume;
 
   static List<dynamic> parseData(List data) {
     return data
         .map(
-          (entry) => EarningsModel(
+          (entry) => RobinhoodModel(
             entry['company'].toString(),
-            entry['datetime'].toString(),
-            entry['eps_estimate'].toString(),
+            entry['market_cap'].toString(),
+            entry['price'].toString(),
             entry['ticker'].toString(),
             int.parse(entry['volume'].toString()),
           ),

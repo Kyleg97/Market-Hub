@@ -120,4 +120,6 @@ app.*.symbols
 # Exceptions to above rules.
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 frontend/lib/apikeys.dart
-backend/keys.py
+secrets.py
+google-services.json
+markethub-service-account.json

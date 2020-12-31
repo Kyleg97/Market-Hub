@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../trading_apps.dart';
+import '../services/trading_apps.dart';
 
 class StocktwitsCard extends StatelessWidget {
   final String symbol;

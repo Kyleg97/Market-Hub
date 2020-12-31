@@ -3,13 +3,14 @@ import 'package:MarketHub/pages/page_settings.dart';
 import 'package:MarketHub/providers/ipos_provider.dart';
 import 'package:MarketHub/providers/stocktwits_provider.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'pages/page_earnings_ipo.dart';
 import 'pages/page_news.dart';
-import 'trading_apps.dart';
+import 'services/trading_apps.dart';
 import 'pages/page_popular.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:MarketHub/pages/page_earnings_ipo.dart';
@@ -20,6 +21,7 @@ void main() async {
     statusBarColor: Colors.transparent,
   ));
   WidgetsFlutterBinding.ensureInitialized();
+  //await Firebase.initializeApp();
   runApp(MyApp());
 }
 
@@ -102,13 +104,14 @@ class _MyHomePageState extends State<MyHomePage>
     super.initState();
     TradingApps.getApps();
 
-    SchedulerBinding.instance.addPostFrameCallback((_) {
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
       final systemTheme = SystemUiOverlayStyle.light.copyWith(
         systemNavigationBarColor: Theme.of(context).accentColor,
         //statusBarColor: Theme.of(context).accentColor,
         //systemNavigationBarIconBrightness: Brightness.light,
       );
       SystemChrome.setSystemUIOverlayStyle(systemTheme);
+      await Firebase.initializeApp();
     });
 
     _animationController = AnimationController(

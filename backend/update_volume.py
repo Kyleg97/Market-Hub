@@ -2,71 +2,22 @@ import datetime
 import math
 import yfinance
 import mysql.connector
+import pyrebase
+from secrets import firebaseConfig
 
 
-def update_volume(ticker, volume, table_name):
-    try:
-        connection = mysql.connector.connect(host='localhost',
-                                             database='praw_schema',
-                                             user='root',
-                                             password='password')
-        if ticker is None:
-            ticker = "Error"
-        if volume is None:
-            volume = -500
-
-        mysql_update_query = """UPDATE {} SET current_volume="{}" WHERE ticker_name="{}" """.format(table_name, volume, ticker)
-
-        cursor = connection.cursor()
-
-        cursor.execute(mysql_update_query)
-        connection.commit()
-
-        mysql_sort_query = """ALTER TABLE {} ORDER BY current_volume DESC""".format(table_name)
-        cursor.execute(mysql_sort_query)
-        connection.commit()
-
-        cursor.close()
-
-    except mysql.connector.Error as error:
-        print("Failed to update record in the table {}".format(error))
-
-    finally:
-        if (connection.is_connected()):
-            connection.close()
-
-
-def read_from_table(table_name):
+def get_ticker_list():
     ticker_list = []
-    try:
-        connection = mysql.connector.connect(host='localhost',
-                                             database='praw_schema',
-                                             user='root',
-                                             password='password')
-
-        cursor = connection.cursor()
-
-        cursor.execute('SELECT * FROM praw_schema.{}'.format(table_name))
-
-        for row in cursor.fetchall():
-            if table_name == "earnings_info":
-                ticker_list.append(row[0])
-            elif table_name == "robinhood_popular":
-                ticker_list.append(row[1])
-        cursor.close()
-
-    except mysql.connector.Error as error:
-        print("Failed to read table. {}".format(error))
-
-    finally:
-        if (connection.is_connected()):
-            connection.close()
-
+    robinhood_popular = db.child("robinhood-popular").get()
+    for ticker in robinhood_popular.each():
+        ticker_list.append(ticker.key())
+    earnings_info = db.child("earnings-info").get()
+    for ticker in earnings_info.each():
+        ticker_list.append(ticker.key())
     return ticker_list
 
 
-def get_ticker_info(table_name):
-    ticker_list = read_from_table(table_name)
+def get_volume_info(ticker_list):
     ticker_string = ""
 
     for each in ticker_list:
@@ -85,12 +36,33 @@ def get_ticker_info(table_name):
 
     for ticker in ticker_list:
         if not math.isnan(data['Volume'][ticker][str(today)]):
-            volume_dict[ticker] = data['Volume'][ticker][str(today)]
+            volume_dict[ticker] = str(data['Volume'][ticker][str(today)])
+    
+    return volume_dict
 
-    for each in volume_dict:
-        update_volume(each, volume_dict[each], table_name)
-    print("Finished updating: " + table_name + ".")
+def update_robinhood_data(data):
+    for each in data:
+        db.child("robinhood-popular").child(each).update(data[each])
+
+def update_earnings_data(data):
+    for each in data:
+        db.child("earnings-info").child(each).update(data[each])
+    
 
 
-get_ticker_info("earnings_info")
-get_ticker_info("robinhood_popular")
+firebase = pyrebase.initialize_app(firebaseConfig)
+db = firebase.database()
+
+robinhood_dict = db.child("robinhood-popular").get().val()
+
+earnings_dict = db.child("earnings-info").get().val()
+
+volume_info = get_volume_info(get_ticker_list())
+for each in volume_info:
+    if each in robinhood_dict:
+        robinhood_dict[each]['volume'] = volume_info[each]
+    if each in earnings_dict:
+        earnings_dict[each]['volume'] = volume_info[each]
+
+update_robinhood_data(robinhood_dict)
+update_earnings_data(earnings_dict)

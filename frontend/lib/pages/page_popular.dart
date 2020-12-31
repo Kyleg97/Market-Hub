@@ -7,7 +7,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:MarketHub/api/api_reddit.dart';
 import 'package:MarketHub/api/api_rhpopular.dart';
 import 'package:MarketHub/api/api_stocktwits.dart';
-import 'package:MarketHub/trading_apps.dart';
+import 'package:MarketHub/services/trading_apps.dart';
 
 class PopularPage extends StatefulWidget {
   PopularPage() : super();

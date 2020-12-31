@@ -1,6 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 import mysql.connector
+import pyrebase
+from secrets import firebaseConfig
 
 class UpcomingIPO:
     def __init__(self, ticker, company, date, price_range, shares_num, volume):
@@ -12,48 +14,17 @@ class UpcomingIPO:
         self.volume = volume
 
 
-def insert_to_table(upcoming_ipo_obj):
-    try:
-        connection = mysql.connector.connect(host='localhost',
-                                             database='praw_schema',
-                                             user='root',
-                                             password='password')
+def clear_data():
+    db.child("ipo-info").remove()
+    print("data cleared from ipo-info")
 
-        mySql_insert_query = """INSERT INTO upcoming_ipo (ticker_name, company_name, date, price_range, shares_num, volume) 
-                               VALUES 
-                               ("{}", "{}", "{}", "{}", "{}", "{}") """.format(upcoming_ipo_obj.ticker, upcoming_ipo_obj.company, upcoming_ipo_obj.date,
-                                                                               upcoming_ipo_obj.price_range, upcoming_ipo_obj.shares_num, upcoming_ipo_obj.volume)
-
-        cursor = connection.cursor()
-        cursor.execute(mySql_insert_query)
-        connection.commit()
-        cursor.close()
-
-    except mysql.connector.Error as error:
-        print("Failed to insert record into upcoming_ipo table {}".format(error))
-
-    finally:
-        if (connection.is_connected()):
-            connection.close()
+def add_data(data):
+    db.child("ipo-info").set(data)
+    print("data added to realtime database")
 
 
-def clear_table():
-    try:
-        connection = mysql.connector.connect(host='localhost',
-                                             database='praw_schema',
-                                             user='root',
-                                             password='password')
-        cursor = connection.cursor()
-        cursor.execute("TRUNCATE TABLE {}".format('upcoming_ipo'))
-        connection.commit()
-
-    except mysql.connector.Error as error:
-        print("Failed to clear data table {}".format(error))
-
-    finally:
-        if (connection.is_connected()):
-            connection.close()
-
+firebase = pyrebase.initialize_app(firebaseConfig)
+db = firebase.database()
 
 URL = "https://www.marketbeat.com/ipos/"
 page = requests.get(URL)
@@ -73,9 +44,15 @@ for row in rows:
     price_range = cols[2].text
     shares_num = cols[3].text
     volume = cols[4].text.replace('$', '')
-    ipo_list.append(UpcomingIPO(ticker, company, date, price_range, shares_num, volume))
+    #ipo_list.append(UpcomingIPO(ticker, company, date, price_range, shares_num, volume))
+    ipo_list.append({
+        'ticker': ticker,
+        'company': company,
+        'date': date,
+        'price_range': price_range,
+        'shares_num': shares_num,
+        'volume': volume
+    })
 
-if len(ipo_list) > 0:
-    clear_table()
-for obj in ipo_list:
-    insert_to_table(obj)
+clear_data()
+add_data(ipo_list)
