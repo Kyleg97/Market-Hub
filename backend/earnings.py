@@ -32,7 +32,7 @@ db = firebase.database()
 
 today = datetime.today()
 #date_to = today + relativedelta(years=1)
-date_to = today + relativedelta(weekday=5)
+date_to = today + relativedelta(months=1)
 
 yec = YahooEarningsCalendar()
 
@@ -53,16 +53,27 @@ tickers_string = ""
 for ticker in ticker_set:
     tickers_string += " " + ticker
 
-data = {}
+#data = {}
+data = []
 
 for each in earning_info_list:
     date_time = datetime.strptime(each.date_time, '%Y-%m-%dT%H:%M:%S.%fZ')
-    data[each.ticker] = {
+    if each.eps_estimate is None:
+        each.eps_estimate = "-1000"
+    # data[each.ticker] = {
+    #     "company": each.company_name,
+    #     "datetime": str(date_time),
+    #     "eps_estimate": each.eps_estimate,
+    #     "volume": -1000
+    # }
+    data.append({
+        "ticker": each.ticker,
         "company": each.company_name,
         "datetime": str(date_time),
         "eps_estimate": each.eps_estimate,
         "volume": -1000
-    }
+    })
 
+print(data)
 clear_data()
 add_data(data)

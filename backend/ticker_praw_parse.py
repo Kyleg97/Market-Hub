@@ -46,18 +46,23 @@ def subreddit_parse(subreddit_name, table_name):
     most_occurring = counter.most_common(len(word_list))
 
     test = set(word_list).intersection(ticker_dict)
-
     new_dict = {}
+    #new_list_dict = list(dict())
 
     for ticker in test:
         for occurring in most_occurring:
             if ticker.upper() == occurring[0].upper() and ticker.upper() not in ignore:
                 new_dict[ticker] = occurring[1]
+                #new_list_dict.append({"ticker": ticker, "count": occuring[1]})
             if ticker.upper() == "TECH":
                 for each in tech:
                     if each in most_occurring:
                         new_dict[each] += 1
+                        # for entry in new_list_dict:
+                        #     if entry['ticker'] == each:
+                        #         entry['count'] += 1
     return new_dict
+    #return new_list_dict
 
 def random_ticker():
     ticker = random.sample(list(ticker_dict), 1)[0]
@@ -107,30 +112,41 @@ for each in subreddits:
     if each == "stocks":
         stock_dict = subreddit_parse(each, subreddits[each])
         print(stock_dict)
-    if each == "pennystocks":
-        pennystocks_dict = subreddit_parse(each, subreddits[each])
-        print(pennystocks_dict)
-    if each == "wallstreetbets":
-        wsb_dict = subreddit_parse(each, subreddits[each])
-        print(wsb_dict)
-    if each == "smallstreetbets":
-        ssb_dict = subreddit_parse(each, subreddits[each])
-        print(ssb_dict)
-    if each == "investing":
-        investing_dict = subreddit_parse(each, subreddits[each])
-        print(investing_dict)
-    if each == "thewallstreet":
-        thewallstreet_dict = subreddit_parse(each, subreddits[each])
-        print(thewallstreet_dict)
-    if each == "options":
-        options_dict = subreddit_parse(each, subreddits[each])
-        print(options_dict)
+    # if each == "pennystocks":
+    #     pennystocks_dict = subreddit_parse(each, subreddits[each])
+    #     print(pennystocks_dict)
+    # if each == "wallstreetbets":
+    #     wsb_dict = subreddit_parse(each, subreddits[each])
+    #     print(wsb_dict)
+    # if each == "smallstreetbets":
+    #     ssb_dict = subreddit_parse(each, subreddits[each])
+    #     print(ssb_dict)
+    # if each == "investing":
+    #     investing_dict = subreddit_parse(each, subreddits[each])
+    #     print(investing_dict)
+    # if each == "thewallstreet":
+    #     thewallstreet_dict = subreddit_parse(each, subreddits[each])
+    #     print(thewallstreet_dict)
+    # if each == "options":
+    #     options_dict = subreddit_parse(each, subreddits[each])
+    #     print(options_dict)
 
 common_tickers = dict(Counter(stock_dict) + Counter(pennystocks_dict) + Counter(wsb_dict) + Counter(ssb_dict) +
                       Counter(investing_dict) + Counter(thewallstreet_dict) + Counter(options_dict))
 
-print("\ncommon_tickers:")
 print(common_tickers)
 
+data = sorted(common_tickers.items(), key=lambda x: x[1], reverse=True)
+
+organized_list = []
+for each in data:
+    organized_list.append({
+        "ticker": each[0],
+        "count": each[1]
+    })
+
+print("\ndata:")
+print(organized_list)
+
 clear_data()
-add_data(common_tickers)
+add_data(organized_list)

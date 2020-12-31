@@ -24,19 +24,27 @@ results = soup.find(id='react_root')
 company_names = results.find_all('span', class_='_2fMBL180hIqVoxOuNVJgST')
 td_row_1 = results.find_all('td', class_='_6M0lojguuu-oGcosChSe6')
 
-popular = {}
+#popular = {}
+popular = []
 
 for each in td_row_1:
     ticker = each.find_next_sibling("td").text
     price = each.find_next_sibling("td").find_next_sibling("td").text
     percent_change_today = each.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text
     market_cap = each.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text
-    popular[ticker] = {
+    popular.append({
+        "ticker": ticker,
         "company": each.text,
         "price": price,
         "market_cap": market_cap,
-        "volume": -1000 
-    }
+        "volume": -1000
+    })
+    # popular[ticker] = {
+    #     "company": each.text,
+    #     "price": price,
+    #     "market_cap": market_cap,
+    #     "volume": -1000 
+    # }
 
 clear_data()
 add_data(popular)
