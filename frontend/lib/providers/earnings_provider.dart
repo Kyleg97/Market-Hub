@@ -1,4 +1,5 @@
 import 'package:MarketHub/models/earnings_model.dart';
+import 'package:MarketHub/services/api.dart';
 import 'package:flutter/material.dart';
 
 class EarningsProvider with ChangeNotifier {
@@ -14,7 +15,7 @@ class EarningsProvider with ChangeNotifier {
   }
 
   Future<void> fetchEarningsInfo() async {
-    _items = await EarningsModel.fetchEarnings();
+    _items = await API.fetchEarnings();
     print(_items);
     notifyListeners();
   }

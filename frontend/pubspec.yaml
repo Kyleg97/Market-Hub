@@ -36,6 +36,8 @@ dependencies:
   flutter_launcher_icons: ^0.7.5 # application icon
   animated_bottom_navigation_bar: ^0.1.2+2
   provider: ^4.3.2+2
+  firebase_database: ^4.4.0
+  firebase_core: ^0.5.3
 
 dev_dependencies:
   flutter_test:

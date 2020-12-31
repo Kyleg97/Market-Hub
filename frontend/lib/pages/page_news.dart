@@ -1,3 +1,4 @@
+import 'package:MarketHub/services/api.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -34,7 +35,12 @@ class NewsPageState extends State<NewsPage> {
   @override
   void initState() {
     super.initState();
-    callNews();
+    //callNews();
+    API.fetchEarnings();
+    API.fetchRobinhood();
+    API.fetchReddit();
+    API.fetchStocktwits();
+    API.fetchIPOInfo();
   }
 
   @override

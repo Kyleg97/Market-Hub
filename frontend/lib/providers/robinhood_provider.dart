@@ -1,4 +1,3 @@
-import 'package:MarketHub/models/ipo_model.dart';
 import 'package:MarketHub/models/stocktwits_model.dart';
 import 'package:flutter/material.dart';
 

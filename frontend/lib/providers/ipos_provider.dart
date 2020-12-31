@@ -14,7 +14,7 @@ class IposProvider with ChangeNotifier {
   }
 
   Future<void> fetchIpos() async {
-    _items = await IpoModel.fetchUpcomingIPO();
+    //_items = await IpoModel.fetchUpcomingIPO();
     print(_items);
     notifyListeners();
   }
