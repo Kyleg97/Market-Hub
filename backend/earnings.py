@@ -4,7 +4,8 @@ from yahoo_earnings_calendar import YahooEarningsCalendar
 import mysql.connector
 from dateutil import parser
 import pyrebase
-from secrets import firebaseConfig
+from secrets import firebaseConfig, EMAIL, PW
+
 
 class EarningInfo:
     def __init__(self, ticker, company_name, date_time, date_time_type, eps_estimate):
@@ -14,21 +15,22 @@ class EarningInfo:
         self.date_time_type = date_time_type
         self.eps_estimate = eps_estimate
 
-        def __eq__(self, other):
-            return self.ticker == other.ticker and self.company_name == other.company_name
-
 
 def clear_data():
-    db.child("earnings-info").remove()
+    db.child("earnings-info").remove(user['idToken'])
     print("data cleared")
 
 def add_data(data):
-    db.child("earnings-info").set(data)
+    db.child("earnings-info").set(data, user['idToken'])
     print("data added to realtime database")
 
 
 firebase = pyrebase.initialize_app(firebaseConfig)
+
+auth = firebase.auth()
 db = firebase.database()
+
+user = auth.sign_in_with_email_and_password(EMAIL, PW)
 
 today = datetime.today()
 #date_to = today + relativedelta(years=1)

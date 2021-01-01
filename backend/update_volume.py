@@ -3,17 +3,17 @@ import math
 import yfinance
 import mysql.connector
 import pyrebase
-from secrets import firebaseConfig
+from secrets import firebaseConfig, EMAIL, PW
 
 
 def get_ticker_list():
     ticker_list = []
     robinhood_popular = db.child("robinhood-popular").get()
-    for ticker in robinhood_popular.each():
-        ticker_list.append(ticker.key())
+    for data in robinhood_popular.each():
+        ticker_list.append(data.val()['ticker'])
     earnings_info = db.child("earnings-info").get()
-    for ticker in earnings_info.each():
-        ticker_list.append(ticker.key())
+    for data in earnings_info.each():
+        ticker_list.append(data.val()['ticker'])
     return ticker_list
 
 
@@ -40,18 +40,22 @@ def get_volume_info(ticker_list):
     
     return volume_dict
 
+
 def update_robinhood_data(data):
     for each in data:
-        db.child("robinhood-popular").child(each).update(data[each])
+        db.child("robinhood-popular").child(each).update(data[each], user['idToken'])
 
 def update_earnings_data(data):
     for each in data:
-        db.child("earnings-info").child(each).update(data[each])
+        db.child("earnings-info").child(each).update(data[each], user['idToken'])
     
 
-
 firebase = pyrebase.initialize_app(firebaseConfig)
+
+auth = firebase.auth()
 db = firebase.database()
+
+user = auth.sign_in_with_email_and_password(EMAIL, PW)
 
 robinhood_dict = db.child("robinhood-popular").get().val()
 

@@ -7,9 +7,8 @@ import random
 from praw.models import MoreComments
 from operator import itemgetter
 from collections import Counter
-from secrets import CLIENT_ID, CLIENT_SECRET
+from secrets import CLIENT_ID, CLIENT_SECRET, firebaseConfig, EMAIL, PW
 import pyrebase
-from secrets import firebaseConfig
 
 
 def subreddit_parse(subreddit_name, table_name):
@@ -70,15 +69,19 @@ def random_ticker():
     return ticker, name
 
 def clear_data():
-    db.child("reddit-mentions").remove()
+    db.child("reddit-mentions").remove(user['idToken'])
     print("data cleared from reddit-mentions")
 
 def add_data(data):
-    db.child("reddit-mentions").set(data)
+    db.child("reddit-mentions").set(data, user['idToken'])
     print("data added to realtime database")
 
 firebase = pyrebase.initialize_app(firebaseConfig)
+
+auth = firebase.auth()
 db = firebase.database()
+
+user = auth.sign_in_with_email_and_password(EMAIL, PW)
 
 with open('stocklist.csv', mode='r') as infile:
     reader = csv.reader(infile)

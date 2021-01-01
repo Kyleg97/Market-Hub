@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import mysql.connector
 import pyrebase
-from secrets import firebaseConfig
+from secrets import firebaseConfig, EMAIL, PW
 
 class UpcomingIPO:
     def __init__(self, ticker, company, date, price_range, shares_num, volume):
@@ -15,16 +15,20 @@ class UpcomingIPO:
 
 
 def clear_data():
-    db.child("ipo-info").remove()
+    db.child("ipo-info").remove(user['idToken'])
     print("data cleared from ipo-info")
 
 def add_data(data):
-    db.child("ipo-info").set(data)
+    db.child("ipo-info").set(data, user['idToken'])
     print("data added to realtime database")
 
 
 firebase = pyrebase.initialize_app(firebaseConfig)
+
+auth = firebase.auth()
 db = firebase.database()
+
+user = auth.sign_in_with_email_and_password(EMAIL, PW)
 
 URL = "https://www.marketbeat.com/ipos/"
 page = requests.get(URL)

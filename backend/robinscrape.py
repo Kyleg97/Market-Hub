@@ -1,18 +1,23 @@
 import requests
 from bs4 import BeautifulSoup
 import pyrebase
-from secrets import firebaseConfig
+from secrets import firebaseConfig, EMAIL, PW
 
 def clear_data():
-    db.child("robinhood-popular").remove()
+    db.child("robinhood-popular").remove(user['idToken'])
     print("data cleared")
 
 def add_data(data):
-    db.child("robinhood-popular").set(data)
+    db.child("robinhood-popular").set(data, user['idToken'])
     print("data added to realtime database")
 
 firebase = pyrebase.initialize_app(firebaseConfig)
+
+auth = firebase.auth()
 db = firebase.database()
+
+user = auth.sign_in_with_email_and_password(EMAIL, PW)
+print(user)
 
 URL = "https://robinhood.com/collections/100-most-popular"
 page = requests.get(URL)
