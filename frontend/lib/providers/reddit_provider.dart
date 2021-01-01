@@ -1,21 +1,20 @@
-import 'package:MarketHub/models/robinhood_model.dart';
 import 'package:MarketHub/services/api.dart';
 import 'package:flutter/material.dart';
 
-class RobinhoodProvider with ChangeNotifier {
-  List<RobinhoodModel> _items = [];
+class RedditProvider with ChangeNotifier {
+  List<RedditProvider> _items = [];
 
-  List<RobinhoodModel> get items {
+  List<RedditProvider> get items {
     return [..._items];
   }
 
-  void addStocktwitTrending(RobinhoodModel object) {
+  void addStocktwitTrending(RedditProvider object) {
     _items.add(object);
     notifyListeners();
   }
 
   Future<void> fetchStocktwitsTrending() async {
-    _items = await API.fetchRobinhood();
+    _items = await API.fetchReddit();
     notifyListeners();
   }
 

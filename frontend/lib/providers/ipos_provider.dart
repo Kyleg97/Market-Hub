@@ -1,4 +1,5 @@
 import 'package:MarketHub/models/ipo_model.dart';
+import 'package:MarketHub/services/api.dart';
 import 'package:flutter/material.dart';
 
 class IposProvider with ChangeNotifier {
@@ -14,7 +15,7 @@ class IposProvider with ChangeNotifier {
   }
 
   Future<void> fetchIpos() async {
-    //_items = await IpoModel.fetchUpcomingIPO();
+    _items = await API.fetchIPOInfo();
     print(_items);
     notifyListeners();
   }

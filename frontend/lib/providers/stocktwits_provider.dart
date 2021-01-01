@@ -1,5 +1,5 @@
-import 'package:MarketHub/models/ipo_model.dart';
 import 'package:MarketHub/models/stocktwits_model.dart';
+import 'package:MarketHub/services/api.dart';
 import 'package:flutter/material.dart';
 
 class StocktwitsProvider with ChangeNotifier {
@@ -15,7 +15,7 @@ class StocktwitsProvider with ChangeNotifier {
   }
 
   Future<void> fetchStocktwitsTrending() async {
-    //_items = await StocktwitsModel.fetchStocktwitsTrending();
+    _items = await API.fetchStocktwits();
     notifyListeners();
   }
 
