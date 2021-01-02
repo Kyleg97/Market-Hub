@@ -1,4 +1,3 @@
-import 'package:MarketHub/api/api_ipo.dart';
 import 'package:MarketHub/providers/earnings_provider.dart';
 import 'package:MarketHub/providers/ipos_provider.dart';
 import 'package:MarketHub/widgets/earning_card.dart';
@@ -6,7 +5,7 @@ import 'package:MarketHub/widgets/ipo_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
-import 'package:MarketHub/api/api_earnings.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../providers/earnings_provider.dart';
 
 class EarningsIPOPage extends StatefulWidget {
@@ -17,13 +16,9 @@ class EarningsIPOPage extends StatefulWidget {
 
 class EarningsIPOPageState extends State<EarningsIPOPage> {
   TextStyle textStyle = TextStyle(fontSize: 18, fontFamily: 'Montserrat');
-  List<EarningsInfo> earnings;
-  List<UpcomingIpo> ipos;
 
-  bool _isInit = true;
-  bool _isLoadingEarnings = false;
-  bool _isLoadingIpos = false;
-
+  RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
   ScrollController _scrollController = new ScrollController();
 
   int _currentView = 0; // 0 == Earnings, 1 == IPO
@@ -31,7 +26,7 @@ class EarningsIPOPageState extends State<EarningsIPOPage> {
   int averageVolume = 0;
   DateTime currentDate;
 
-  /*CustomDropDownItem _currentDropdownValue;
+  CustomDropDownItem _currentDropdownValue;
   List<CustomDropDownItem> _customDropdownItems = [
     CustomDropDownItem(Icon(Icons.arrow_upward), "Volume", 1),
     CustomDropDownItem(Icon(Icons.arrow_upward), "Date", 1),
@@ -39,36 +34,11 @@ class EarningsIPOPageState extends State<EarningsIPOPage> {
     CustomDropDownItem(Icon(Icons.arrow_downward), "Volume", -1),
     CustomDropDownItem(Icon(Icons.arrow_downward), "Date", -1),
     CustomDropDownItem(Icon(Icons.arrow_downward), "EPS Estimate", -1),
-  ];*/
+  ];
 
   @override
   void initState() {
     super.initState();
-    // callEarnings();
-    // Provider.of<EarningsProvider>(context).fetchEarningsInfo();
-    // callUpcomingIPO();
-  }
-
-  @override
-  void didChangeDependencies() {
-    if (_isInit) {
-      setState(() {
-        _isLoadingEarnings = true;
-        _isLoadingIpos = true;
-      });
-      Provider.of<EarningsProvider>(context).fetchEarningsInfo().then((_) {
-        setState(() {
-          _isLoadingEarnings = false;
-        });
-      });
-      Provider.of<IposProvider>(context).fetchIpos().then((_) {
-        setState(() {
-          _isLoadingIpos = false;
-        });
-      });
-    }
-    _isInit = false;
-    super.didChangeDependencies();
   }
 
   @override
@@ -76,28 +46,7 @@ class EarningsIPOPageState extends State<EarningsIPOPage> {
     super.dispose();
   }
 
-  /*callEarnings() async {
-    earnings = await Earnings.fetchEarnings();
-    averageVolume = calculateAverageVolume();
-    print("Average Volume: " + averageVolume.toString());
-    setState(() {});
-  }*/
-
-  /*callUpcomingIPO() async {
-    ipos = await IPO.fetchUpcomingIPO();
-    setState(() {});
-  }*/ /////
-
-  Future<void> _refreshEarnings(BuildContext context) async {
-    await Provider.of<EarningsProvider>(context, listen: false)
-        .fetchEarningsInfo();
-  }
-
-  Future<void> _refreshIpos(BuildContext context) async {
-    await Provider.of<IposProvider>(context, listen: false).fetchIpos();
-  }
-
-  void sort(CustomDropDownItem value) {
+  /*void sort(CustomDropDownItem value) {
     setState(() {
       if (value.word == "Volume" && value.function == 1) {
         earnings.sort((b, a) => a.currentVolume.compareTo(b.currentVolume));
@@ -115,9 +64,9 @@ class EarningsIPOPageState extends State<EarningsIPOPage> {
         earnings.sort((b, a) => a.epsEstimate.compareTo(b.epsEstimate));
       }
     });
-  }
+  }*/
 
-  int calculateAverageVolume() {
+  /*int calculateAverageVolume() {
     int sum = 0;
     earnings.forEach((element) {
       if (element.currentVolume != -1000) {
@@ -125,7 +74,7 @@ class EarningsIPOPageState extends State<EarningsIPOPage> {
       }
     });
     return (sum / earnings.length).round();
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -186,90 +135,107 @@ class EarningsIPOPageState extends State<EarningsIPOPage> {
       body: SafeArea(
         bottom: false,
         child: _currentView == 0
-            ? _isLoadingEarnings
-                ? Center(child: CircularProgressIndicator())
-                : RefreshIndicator(
-                    onRefresh: () => _refreshEarnings(context),
-                    child: EarningsListviewBuilder(
-                      scrollController: _scrollController,
-                      averageVolume: averageVolume,
-                    ),
-                  )
-            : _isLoadingIpos
-                ? Center(child: CircularProgressIndicator())
-                : RefreshIndicator(
-                    onRefresh: () => _refreshIpos(context),
-                    child: IpoListViewBuilder(
-                        scrollController: _scrollController,
-                        averageVolume: averageVolume),
-                  ),
+            ? EarningsPage(
+                scrollController: _scrollController,
+                refreshController: _refreshController,
+              )
+            : IpoPage(
+                scrollController: _scrollController,
+                refreshController: _refreshController),
       ),
     );
   }
 }
 
-class IpoListViewBuilder extends StatelessWidget {
-  const IpoListViewBuilder({
+// Earnings Page
+class EarningsPage extends StatelessWidget {
+  const EarningsPage({
     Key key,
     @required ScrollController scrollController,
-    @required this.averageVolume,
+    @required RefreshController refreshController,
   })  : _scrollController = scrollController,
+        _refreshController = refreshController,
         super(key: key);
 
   final ScrollController _scrollController;
-  final int averageVolume;
+  final RefreshController _refreshController;
 
   @override
   Widget build(BuildContext context) {
-    final iposData = Provider.of<IposProvider>(context);
-    final ipos = iposData.items;
-    return ListView.builder(
-      padding: const EdgeInsets.all(10),
-      controller: _scrollController,
-      itemCount: ipos.length,
-      itemBuilder: (context, i) => Container(),
-      /*itemBuilder: (context, i) => IpoItem(
-        ipos[i].tickerName,
-        ipos[i].companyName,
-        ipos[i].date,
-        ipos[i].volume,
-        ipos[i].priceRange,
-        ipos[i].sharesNum,
-        averageVolume,
-      ),*/
+    return ChangeNotifierProvider.value(
+      value: EarningsProvider(),
+      child: Consumer<EarningsProvider>(
+        builder: (context, provider, child) {
+          return provider.isFetching
+              ? Center(child: CircularProgressIndicator())
+              : SmartRefresher(
+                  enablePullDown: true,
+                  header: WaterDropHeader(),
+                  controller: _refreshController,
+                  onRefresh: () => provider.fetchData(),
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(10),
+                    controller: _scrollController,
+                    itemCount: provider.items.length,
+                    itemBuilder: (context, i) => EarningItem(
+                      provider.items[i].ticker,
+                      provider.items[i].company,
+                      provider.items[i].volume,
+                      double.parse(provider.items[i].epsEstimate),
+                      provider.items[i].datetime,
+                      5, // replace later with average volume
+                    ),
+                  ),
+                );
+        },
+      ),
     );
   }
 }
 
-class EarningsListviewBuilder extends StatelessWidget {
-  const EarningsListviewBuilder({
+// IPO Page
+class IpoPage extends StatelessWidget {
+  const IpoPage({
     Key key,
     @required ScrollController scrollController,
-    @required this.averageVolume,
+    @required RefreshController refreshController,
   })  : _scrollController = scrollController,
+        _refreshController = refreshController,
         super(key: key);
 
   final ScrollController _scrollController;
-  final int averageVolume;
+  final RefreshController _refreshController;
 
   @override
   Widget build(BuildContext context) {
-    final earningsData = Provider.of<EarningsProvider>(context);
-    final earnings = earningsData.items;
-    return ListView.builder(
-      padding: const EdgeInsets.all(10),
-      controller: _scrollController,
-      itemCount: earnings.length,
-      itemBuilder: (context, i) =>
-          /*EarningItem(
-        earnings[i].tickerName,
-        earnings[i].companyName,
-        earnings[i].currentVolume,
-        earnings[i].epsEstimate,
-        earnings[i].earningsDatetime,
-        averageVolume,
-      ),*/
-          Container(),
+    return ChangeNotifierProvider.value(
+      value: IposProvider(),
+      child: Consumer<IposProvider>(
+        builder: (context, provider, child) {
+          return provider.isFetching
+              ? Center(child: CircularProgressIndicator())
+              : SmartRefresher(
+                  enablePullDown: true,
+                  header: WaterDropHeader(),
+                  controller: _refreshController,
+                  onRefresh: () => provider.fetchData(),
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(10),
+                    controller: _scrollController,
+                    itemCount: provider.items.length,
+                    itemBuilder: (context, i) => IpoItem(
+                      provider.items[i].ticker,
+                      provider.items[i].company,
+                      provider.items[i].date,
+                      provider.items[i].volume,
+                      provider.items[i].priceRange,
+                      provider.items[i].shares,
+                      5, // replace with average volume
+                    ),
+                  ),
+                );
+        },
+      ),
     );
   }
 }

@@ -1,10 +1,9 @@
-import 'package:MarketHub/services/api.dart';
+/*import 'package:MarketHub/services/api.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:intl/intl.dart';
-import 'package:MarketHub/api/api_news.dart';
 
 class NewsPage extends StatefulWidget {
   @override
@@ -170,3 +169,4 @@ class NewsPageState extends State<NewsPage> {
     );
   }
 }
+*/

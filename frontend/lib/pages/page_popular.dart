@@ -1,12 +1,11 @@
+import 'package:MarketHub/providers/reddit_provider.dart';
+import 'package:MarketHub/providers/robinhood_provider.dart';
 import 'package:MarketHub/providers/stocktwits_provider.dart';
 import 'package:MarketHub/widgets/stocktwits_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:MarketHub/api/api_reddit.dart';
-import 'package:MarketHub/api/api_rhpopular.dart';
-import 'package:MarketHub/api/api_stocktwits.dart';
 import 'package:MarketHub/services/trading_apps.dart';
 
 class PopularPage extends StatefulWidget {
@@ -17,25 +16,21 @@ class PopularPage extends StatefulWidget {
 }
 
 class PopularPageState extends State<PopularPage> {
-  List<StocktwitsTrending> stocktwitsTrending;
-  List<CommonTicker> redditTrending;
-  List<RhPopular> robinhoodTrending;
-
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
 
   ScrollController _scrollController = new ScrollController();
 
-  int _currentSource = 0; // 0 stocktwits, 1 reddit, 2 google, 3 yahoo, etc...
+  int _currentSource = 0; // 0 stocktwits, 1 reddit, 2 robinhood, 3?
 
-  bool _isInit = true;
+  /*bool _isInit = true;
   bool _isLoadingStocktwits = false;
   bool _isLoadingReddit = false;
-  bool _isLoadingRobinhood = false;
+  bool _isLoadingRobinhood = false;*/
 
-  void _onRefresh() async {
+  /*void _onRefresh() async {
     if (_currentSource == 0) {
-      stocktwitsTrending = await StocktwitsTrending.fetchStocktwitsTrending();
+      StocktwitsProvider.fetchData();
     } else if (_currentSource == 1) {
       redditTrending = await RedditTrending.fetchRedditTrending();
     } else if (_currentSource == 2) {
@@ -43,34 +38,11 @@ class PopularPageState extends State<PopularPage> {
     }
     _refreshController.refreshCompleted();
     setState(() {});
-  }
+  }*/
 
   @override
   void initState() {
     super.initState();
-    callStocktwits();
-    callReddit();
-    callRobinhood();
-  }
-
-  @override
-  void didChangeDependencies() {
-    if (_isInit) {
-      setState(() {
-        _isLoadingStocktwits = true;
-        _isLoadingReddit = true;
-        _isLoadingRobinhood = true;
-      });
-      Provider.of<StocktwitsProvider>(context)
-          .fetchStocktwitsTrending()
-          .then((_) {
-        setState(() {
-          _isLoadingStocktwits = false;
-        });
-      });
-    }
-    _isInit = false;
-    super.didChangeDependencies();
   }
 
   @override
@@ -85,20 +57,6 @@ class PopularPageState extends State<PopularPage> {
     trending = await StocktwitsTrending.fetchStocktwitsTrending();
     setState(() {});
   }*/
-
-  void callStocktwits() async {
-    stocktwitsTrending = await StocktwitsTrending.fetchStocktwitsTrending();
-    setState(() {});
-  }
-
-  void callReddit() async {
-    redditTrending = await RedditTrending.fetchRedditTrending();
-    setState(() {});
-  }
-
-  void callRobinhood() async {
-    robinhoodTrending = await RobinhoodTrending.fetchRobinhoodTrending();
-  }
 
   void leavingAppDialog(String ticker) {
     showDialog(
@@ -203,8 +161,8 @@ class PopularPageState extends State<PopularPage> {
         ],
       ),
       body: Container(
-        //bottom: false,
-        /*decoration: new BoxDecoration(
+          //bottom: false,
+          /*decoration: new BoxDecoration(
           gradient: new LinearGradient(
               colors: [Colors.teal[100], Colors.teal],
               begin: const FractionalOffset(0.0, 0.5),
@@ -213,139 +171,256 @@ class PopularPageState extends State<PopularPage> {
               stops: [0.0, 1.0],
               tileMode: TileMode.clamp),
         ),*/
-        child: stocktwitsTrending == null
-            ? Center(child: CircularProgressIndicator())
-            : _currentSource == 0
-                ? SmartRefresher(
-                    enablePullDown: true,
-                    header: WaterDropHeader(),
-                    controller: _refreshController,
-                    onRefresh: _onRefresh,
-                    child: StocktwitsListViewBuilder(
-                        scrollController: _scrollController),
-                  )
-                : _currentSource == 1
-                    ? SmartRefresher(
-                        enablePullDown: true,
-                        header: WaterDropHeader(),
-                        controller: _refreshController,
-                        onRefresh: _onRefresh,
-                        child: ListView.builder(
-                          controller: _scrollController,
-                          padding: const EdgeInsets.all(5),
-                          itemCount: redditTrending.length,
-                          itemBuilder: (context, index) {
-                            return Card(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20.0),
-                              ),
-                              elevation: 5,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  ListTile(
-                                    onTap: () {
-                                      TradingApps.installedApps
-                                          .forEach((element) {
-                                        if (element["app_name"] ==
-                                            "Robinhood") {
-                                          leavingAppDialog(
-                                              redditTrending[index].tickerName);
-                                          return;
-                                        }
-                                      });
-                                    },
-                                    title:
-                                        Text(redditTrending[index].tickerName),
-                                    subtitle:
-                                        Text(redditTrending[index].companyName),
-                                    trailing: Text(
-                                      "Mentions:\n" +
-                                          redditTrending[index]
-                                              .totalMentionCount
-                                              .toString(),
-                                      textAlign: TextAlign.end,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      )
-                    : SmartRefresher(
-                        enablePullDown: true,
-                        header: WaterDropHeader(),
-                        controller: _refreshController,
-                        onRefresh: _onRefresh,
-                        child: ListView.builder(
-                          controller: _scrollController,
-                          padding: const EdgeInsets.all(5),
-                          itemCount: robinhoodTrending.length,
-                          itemBuilder: (context, index) {
-                            return Card(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20.0),
-                              ),
-                              elevation: 5,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  ListTile(
-                                    onTap: () {
-                                      TradingApps.installedApps
-                                          .forEach((element) {
-                                        if (element["app_name"] ==
-                                            "Robinhood") {
-                                          leavingAppDialog(
-                                              robinhoodTrending[index]
-                                                  .tickerName);
-                                          return;
-                                        }
-                                      });
-                                    },
-                                    title: Text(
-                                        robinhoodTrending[index].tickerName),
-                                    subtitle: Text(
-                                        robinhoodTrending[index].companyName),
-                                    trailing: Text(
-                                      "Volume:\n" +
-                                          robinhoodTrending[index]
-                                              .currentVolume
-                                              .toString(),
-                                      textAlign: TextAlign.end,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ),
+          child: _currentSource == 0
+              ? StocktwitsPage(
+                  scrollController: _scrollController,
+                  refreshController: _refreshController,
+                )
+              : _currentSource == 1
+                  ? RedditPage(
+                      scrollController: _scrollController,
+                      refreshController: _refreshController,
+                    )
+                  : RobinhoodPage(
+                      scrollController: _scrollController,
+                      refreshController: _refreshController,
+                    )),
+    );
+  }
+}
+
+// Stocktwits Page
+class StocktwitsPage extends StatelessWidget {
+  const StocktwitsPage({
+    Key key,
+    @required ScrollController scrollController,
+    @required RefreshController refreshController,
+  })  : _scrollController = scrollController,
+        _refreshController = refreshController,
+        super(key: key);
+
+  final ScrollController _scrollController;
+  final RefreshController _refreshController;
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider.value(
+      value: StocktwitsProvider(),
+      child: Consumer<StocktwitsProvider>(
+        builder: (context, provider, child) {
+          return provider.isFetching
+              ? Center(child: CircularProgressIndicator())
+              : SmartRefresher(
+                  enablePullDown: true,
+                  header: WaterDropHeader(),
+                  controller: _refreshController,
+                  onRefresh: () => provider.fetchData(),
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(5),
+                    itemCount: provider.getItems.length,
+                    itemBuilder: (context, i) => StocktwitsCard(
+                        provider.getItems[i].symbol,
+                        provider.getItems[i].title,
+                        provider.getItems[i].watchlistCount),
+                  ),
+                );
+        },
       ),
     );
   }
 }
 
-class StocktwitsListViewBuilder extends StatelessWidget {
-  const StocktwitsListViewBuilder({
+// Reddit Page
+class RedditPage extends StatelessWidget {
+  const RedditPage({
     Key key,
     @required ScrollController scrollController,
+    @required RefreshController refreshController,
   })  : _scrollController = scrollController,
+        _refreshController = refreshController,
         super(key: key);
 
   final ScrollController _scrollController;
+  final RefreshController _refreshController;
+
+  void leavingAppDialog(String ticker, BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Alert"),
+          content: Text("Do you want to view $ticker on Robinhood?"),
+          actions: <Widget>[
+            FlatButton(
+              child: Text("No"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text("Yes"),
+              onPressed: () {
+                TradingApps.launchURL(ticker);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final stocktwitsData = Provider.of<StocktwitsProvider>(context);
-    final stocktwitsTrending = stocktwitsData.items;
-    return ListView.builder(
-      controller: _scrollController,
-      padding: const EdgeInsets.all(5),
-      itemCount: stocktwitsTrending.length,
-      itemBuilder: (context, i) => StocktwitsCard(stocktwitsTrending[i].symbol,
-          stocktwitsTrending[i].title, stocktwitsTrending[i].watchlistCount),
+    return ChangeNotifierProvider.value(
+      value: RedditProvider(),
+      child: Consumer<RedditProvider>(
+        builder: (context, provider, child) {
+          return provider.isFetching
+              ? Center(child: CircularProgressIndicator())
+              : SmartRefresher(
+                  enablePullDown: true,
+                  header: WaterDropHeader(),
+                  controller: _refreshController,
+                  onRefresh: () => provider.fetchData(),
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(5),
+                    itemCount: provider.getItems.length,
+                    itemBuilder: (context, index) {
+                      return Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                        elevation: 5,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ListTile(
+                              onTap: () {
+                                TradingApps.installedApps.forEach((element) {
+                                  if (element["app_name"] == "Robinhood") {
+                                    leavingAppDialog(
+                                        provider.getItems[index].ticker,
+                                        context);
+                                    return;
+                                  }
+                                });
+                              },
+                              title: Text(provider.getItems[index].ticker),
+                              // subtitle: Text(redditTrending[index].companyName), # need to still account for company name in database
+                              trailing: Text(
+                                "Mentions:\n" +
+                                    provider.getItems[index].count.toString(),
+                                textAlign: TextAlign.end,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                );
+        },
+      ),
+    );
+  }
+}
+
+// Robinhood Page
+class RobinhoodPage extends StatelessWidget {
+  const RobinhoodPage({
+    Key key,
+    @required ScrollController scrollController,
+    @required RefreshController refreshController,
+  })  : _scrollController = scrollController,
+        _refreshController = refreshController,
+        super(key: key);
+
+  final ScrollController _scrollController;
+  final RefreshController _refreshController;
+
+  void leavingAppDialog(String ticker, BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Alert"),
+          content: Text("Do you want to view $ticker on Robinhood?"),
+          actions: <Widget>[
+            FlatButton(
+              child: Text("No"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text("Yes"),
+              onPressed: () {
+                TradingApps.launchURL(ticker);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider.value(
+      value: RobinhoodProvider(),
+      child: Consumer<RobinhoodProvider>(
+        builder: (context, provider, child) {
+          return provider.isFetching
+              ? Center(child: CircularProgressIndicator())
+              : SmartRefresher(
+                  enablePullDown: true,
+                  header: WaterDropHeader(),
+                  controller: _refreshController,
+                  onRefresh: () => provider.fetchData(),
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(5),
+                    itemCount: provider.getItems.length,
+                    itemBuilder: (context, index) {
+                      return Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                        elevation: 5,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ListTile(
+                              onTap: () {
+                                TradingApps.installedApps.forEach((element) {
+                                  if (element["app_name"] == "Robinhood") {
+                                    leavingAppDialog(
+                                        provider.getItems[index].ticker,
+                                        context);
+                                    return;
+                                  }
+                                });
+                              },
+                              title: Text(provider.getItems[index].ticker),
+                              subtitle: Text(provider.getItems[index].company),
+                              trailing: Text(
+                                "Volume:\n" +
+                                    provider.getItems[index].volume.toString(),
+                                textAlign: TextAlign.end,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                );
+        },
+      ),
     );
   }
 }

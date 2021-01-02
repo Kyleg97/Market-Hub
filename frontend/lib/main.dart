@@ -95,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage>
     LowfloatPage(),
     // TestPage(),
     EarningsIPOPage(),
-    NewsPage(),
+    //NewsPage(),
     SettingsPage(),
   ];
 

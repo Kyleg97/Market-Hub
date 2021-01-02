@@ -6,7 +6,7 @@ class EarningItem extends StatelessWidget {
   final String companyName;
   final int currentVolume;
   final double epsEstimate;
-  final DateTime earningsDatetime;
+  final String earningsDatetime; // change to DateTime
   final int averageVolume;
 
   EarningItem(this.tickerName, this.companyName, this.currentVolume,
@@ -105,8 +105,9 @@ class EarningItem extends StatelessWidget {
                 child: Padding(
                   padding: EdgeInsets.all(10),
                   child: Text(
-                      "Earnings release: " +
-                          datetimeFormatter.format(earningsDatetime),
+                      /*"Earnings release: " +
+                          datetimeFormatter.format(earningsDatetime),*/
+                      "Earnings release: $earningsDatetime",
                       style: textStyle.copyWith(fontSize: 16)),
                 ))
           ],
