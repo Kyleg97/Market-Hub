@@ -145,7 +145,8 @@ organized_list = []
 for each in data:
     organized_list.append({
         "ticker": each[0],
-        "count": each[1]
+        "count": each[1],
+        "company": ticker_dict[each[0]]
     })
 
 print("\ndata:")
