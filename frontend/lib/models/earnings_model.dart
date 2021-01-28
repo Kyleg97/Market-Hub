@@ -1,27 +1,30 @@
 class EarningsModel {
   EarningsModel(
     this.company,
-    this.datetime,
+    this.startdatetime,
+    this.startdatetimetype,
     this.epsEstimate,
     this.ticker,
-    this.volume,
+    this.timezone,
   );
 
   String company;
-  String datetime;
+  String startdatetime;
+  String startdatetimetype;
   String epsEstimate;
   String ticker;
-  int volume;
+  String timezone;
 
   static List<dynamic> parseData(List data) {
     return data
         .map(
           (entry) => EarningsModel(
             entry['company'].toString(),
-            entry['datetime'].toString(),
-            entry['eps_estimate'].toString(),
+            entry['startdatetime'].toString(),
+            entry['startdatetimetype'].toString(),
+            entry['epsestimate'].toString(),
             entry['ticker'].toString(),
-            int.parse(entry['volume'].toString()),
+            entry['timezone'].toString(),
           ),
         )
         .toList();

@@ -4,6 +4,7 @@ import 'package:MarketHub/widgets/earning_card.dart';
 import 'package:MarketHub/widgets/ipo_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../providers/earnings_provider.dart';
@@ -180,10 +181,9 @@ class EarningsPage extends StatelessWidget {
                     itemBuilder: (context, i) => EarningItem(
                       provider.items[i].ticker,
                       provider.items[i].company,
-                      provider.items[i].volume,
-                      double.parse(provider.items[i].epsEstimate),
-                      provider.items[i].datetime,
-                      5, // replace later with average volume
+                      provider.items[i].startdatetime,
+                      provider.items[i].startdatetimetype,
+                      provider.items[i].timezone,
                     ),
                   ),
                 );

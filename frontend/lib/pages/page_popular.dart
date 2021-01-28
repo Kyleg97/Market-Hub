@@ -4,8 +4,8 @@ import 'package:MarketHub/providers/stocktwits_provider.dart';
 import 'package:MarketHub/widgets/stocktwits_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:MarketHub/services/trading_apps.dart';
 
 class PopularPage extends StatefulWidget {
@@ -16,29 +16,9 @@ class PopularPage extends StatefulWidget {
 }
 
 class PopularPageState extends State<PopularPage> {
-  RefreshController _refreshController =
-      RefreshController(initialRefresh: false);
-
   ScrollController _scrollController = new ScrollController();
 
-  int _currentSource = 0; // 0 stocktwits, 1 reddit, 2 robinhood, 3?
-
-  /*bool _isInit = true;
-  bool _isLoadingStocktwits = false;
-  bool _isLoadingReddit = false;
-  bool _isLoadingRobinhood = false;*/
-
-  /*void _onRefresh() async {
-    if (_currentSource == 0) {
-      StocktwitsProvider.fetchData();
-    } else if (_currentSource == 1) {
-      redditTrending = await RedditTrending.fetchRedditTrending();
-    } else if (_currentSource == 2) {
-      robinhoodTrending = await RobinhoodTrending.fetchRobinhoodTrending();
-    }
-    _refreshController.refreshCompleted();
-    setState(() {});
-  }*/
+  int _currentSource = 0; // 0 stocktwits, 1 reddit, 2 robinhood
 
   @override
   void initState() {
@@ -48,41 +28,6 @@ class PopularPageState extends State<PopularPage> {
   @override
   void dispose() {
     super.dispose();
-  }
-
-  /*void loadStocktwits() async {
-    setState(() {
-      trending = null;
-    });
-    trending = await StocktwitsTrending.fetchStocktwitsTrending();
-    setState(() {});
-  }*/
-
-  void leavingAppDialog(String ticker) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Alert"),
-          content: Text("Do you want to view $ticker on Robinhood?"),
-          actions: <Widget>[
-            FlatButton(
-              child: Text("No"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            FlatButton(
-              child: Text("Yes"),
-              onPressed: () {
-                TradingApps.launchURL(ticker);
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
@@ -161,8 +106,8 @@ class PopularPageState extends State<PopularPage> {
         ],
       ),
       body: Container(
-          //bottom: false,
-          /*decoration: new BoxDecoration(
+        //bottom: false,
+        /*decoration: new BoxDecoration(
           gradient: new LinearGradient(
               colors: [Colors.teal[100], Colors.teal],
               begin: const FractionalOffset(0.0, 0.5),
@@ -171,20 +116,12 @@ class PopularPageState extends State<PopularPage> {
               stops: [0.0, 1.0],
               tileMode: TileMode.clamp),
         ),*/
-          child: _currentSource == 0
-              ? StocktwitsPage(
-                  scrollController: _scrollController,
-                  refreshController: _refreshController,
-                )
-              : _currentSource == 1
-                  ? RedditPage(
-                      scrollController: _scrollController,
-                      refreshController: _refreshController,
-                    )
-                  : RobinhoodPage(
-                      scrollController: _scrollController,
-                      refreshController: _refreshController,
-                    )),
+        child: _currentSource == 0
+            ? StocktwitsPage(scrollController: _scrollController)
+            : _currentSource == 1
+                ? RedditPage(scrollController: _scrollController)
+                : RobinhoodPage(scrollController: _scrollController),
+      ),
     );
   }
 }
@@ -194,13 +131,10 @@ class StocktwitsPage extends StatelessWidget {
   const StocktwitsPage({
     Key key,
     @required ScrollController scrollController,
-    @required RefreshController refreshController,
   })  : _scrollController = scrollController,
-        _refreshController = refreshController,
         super(key: key);
 
   final ScrollController _scrollController;
-  final RefreshController _refreshController;
 
   @override
   Widget build(BuildContext context) {
@@ -210,10 +144,7 @@ class StocktwitsPage extends StatelessWidget {
         builder: (context, provider, child) {
           return provider.isFetching
               ? Center(child: CircularProgressIndicator())
-              : SmartRefresher(
-                  enablePullDown: true,
-                  header: WaterDropHeader(),
-                  controller: _refreshController,
+              : RefreshIndicator(
                   onRefresh: () => provider.fetchData(),
                   child: ListView.builder(
                     controller: _scrollController,
@@ -236,13 +167,10 @@ class RedditPage extends StatelessWidget {
   const RedditPage({
     Key key,
     @required ScrollController scrollController,
-    @required RefreshController refreshController,
   })  : _scrollController = scrollController,
-        _refreshController = refreshController,
         super(key: key);
 
   final ScrollController _scrollController;
-  final RefreshController _refreshController;
 
   void leavingAppDialog(String ticker, BuildContext context) {
     showDialog(
@@ -279,10 +207,7 @@ class RedditPage extends StatelessWidget {
         builder: (context, provider, child) {
           return provider.isFetching
               ? Center(child: CircularProgressIndicator())
-              : SmartRefresher(
-                  enablePullDown: true,
-                  header: WaterDropHeader(),
-                  controller: _refreshController,
+              : RefreshIndicator(
                   onRefresh: () => provider.fetchData(),
                   child: ListView.builder(
                     controller: _scrollController,
@@ -309,7 +234,7 @@ class RedditPage extends StatelessWidget {
                                 });
                               },
                               title: Text(provider.getItems[index].ticker),
-                              // subtitle: Text(redditTrending[index].companyName), # need to still account for company name in database
+                              subtitle: Text(provider.getItems[index].company),
                               trailing: Text(
                                 "Mentions:\n" +
                                     provider.getItems[index].count.toString(),
@@ -333,13 +258,10 @@ class RobinhoodPage extends StatelessWidget {
   const RobinhoodPage({
     Key key,
     @required ScrollController scrollController,
-    @required RefreshController refreshController,
   })  : _scrollController = scrollController,
-        _refreshController = refreshController,
         super(key: key);
 
   final ScrollController _scrollController;
-  final RefreshController _refreshController;
 
   void leavingAppDialog(String ticker, BuildContext context) {
     showDialog(
@@ -376,10 +298,7 @@ class RobinhoodPage extends StatelessWidget {
         builder: (context, provider, child) {
           return provider.isFetching
               ? Center(child: CircularProgressIndicator())
-              : SmartRefresher(
-                  enablePullDown: true,
-                  header: WaterDropHeader(),
-                  controller: _refreshController,
+              : RefreshIndicator(
                   onRefresh: () => provider.fetchData(),
                   child: ListView.builder(
                     controller: _scrollController,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class SettingsPage extends StatefulWidget {
   @override
@@ -21,7 +22,7 @@ class SettingsPageState extends State<SettingsPage> {
     return Center(
       child: SafeArea(
           child: Center(
-        child: Center(child: Text("Settings!")),
+        child: Center(child: Text("Sentimant?")),
       )),
     );
   }

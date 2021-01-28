@@ -1,5 +1,5 @@
-import 'package:MarketHub/pages/page_lowfloat.dart';
 import 'package:MarketHub/pages/page_settings.dart';
+import 'package:MarketHub/pages/page_unusual_volume.dart';
 import 'package:MarketHub/providers/ipos_provider.dart';
 import 'package:MarketHub/providers/stocktwits_provider.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
@@ -9,7 +9,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'pages/page_earnings_ipo.dart';
-import 'pages/page_news.dart';
 import 'services/trading_apps.dart';
 import 'pages/page_popular.dart';
 import 'package:flutter_icons/flutter_icons.dart';
@@ -91,8 +90,8 @@ class _MyHomePageState extends State<MyHomePage>
 
   int _currentIndex = 0;
   final List<Widget> _pages = [
-    PopularPage(), // popular
-    LowfloatPage(),
+    PopularPage(),
+    UnusualVolumePage(),
     // TestPage(),
     EarningsIPOPage(),
     //NewsPage(),
@@ -102,6 +101,10 @@ class _MyHomePageState extends State<MyHomePage>
   @override
   void initState() {
     super.initState();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     TradingApps.getApps();
 
     SchedulerBinding.instance.addPostFrameCallback((_) async {

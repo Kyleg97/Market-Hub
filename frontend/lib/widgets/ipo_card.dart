@@ -13,8 +13,6 @@ class IpoItem extends StatelessWidget {
   IpoItem(this.tickerName, this.companyName, this.date, this.volume,
       this.priceRange, this.sharesNum, this.averageVolume);
 
-  final TextStyle textStyle = TextStyle(fontSize: 18, fontFamily: 'Montserrat');
-
   final NumberFormat volumeFormatter = new NumberFormat("#,##0", "en_US");
   final DateFormat datetimeFormatter = new DateFormat('MM/dd/yyyy hh:mm a');
 
@@ -86,8 +84,7 @@ class IpoItem extends StatelessWidget {
                 alignment: Alignment.center,
                 child: Padding(
                   padding: EdgeInsets.all(10),
-                  child: Text("IPO Date: " + date,
-                      style: textStyle.copyWith(fontSize: 16)),
+                  child: Text("IPO Date: " + date),
                 ))
           ],
         ),
