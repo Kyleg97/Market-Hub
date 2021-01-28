@@ -7,15 +7,6 @@ import pyrebase
 from secrets import firebaseConfig, EMAIL, PW
 
 
-class EarningInfo:
-    def __init__(self, ticker, company_name, date_time, date_time_type, eps_estimate):
-        self.ticker = ticker
-        self.company_name = company_name
-        self.date_time = date_time
-        self.date_time_type = date_time_type
-        self.eps_estimate = eps_estimate
-
-
 def clear_data():
     db.child("earnings-info").remove(user['idToken'])
     print("data cleared")
@@ -36,14 +27,30 @@ today = datetime.today()
 #date_to = today + relativedelta(years=1)
 date_to = today + relativedelta(months=1)
 
+print("Today: " + str(today))
+print("Date to: " + str(date_to))
+
 yec = YahooEarningsCalendar()
 
 earning_info_list = []
-print("retrieving earning info...")
+#print("retrieving earning info...")
 fetched_earnings = yec.earnings_between(today, date_to)
 
-print("fetched earnings...")
+#print("fetched earnings...")
 print(fetched_earnings)
+
+data = []
+for each in fetched_earnings:
+    if each['epsestimate'] is None:
+        each['epsestimate'] = "None"
+    data.append({
+        'ticker': each['ticker'],
+        'company': each['companyshortname'],
+        'epsestimate': each['epsestimate'],
+        'startdatetime': each['startdatetime'],
+        'startdatetimetype': each['startdatetimetype'],
+        'timezone': each['timeZoneShortName']
+    })
 
 #for each in fetched_earnings:
 #    earning_info_list.append(EarningInfo(each['ticker'], each['companyshortname'], each['startdatetime'], each['startdatetimetype'], each['epsestimate']))
@@ -75,4 +82,4 @@ print(fetched_earnings)
 
 #print(data)
 clear_data()
-add_data(fetched_earnings)
+add_data(data)

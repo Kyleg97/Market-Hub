@@ -111,10 +111,10 @@ thewallstreet_dict = {}
 options_dict = {}
 
 for each in subreddits:
-    print("Parsing " + each + "...")
+    #print("Parsing " + each + "...")
     if each == "stocks":
         stock_dict = subreddit_parse(each, subreddits[each])
-        print(stock_dict)
+        #print(stock_dict)
     # if each == "pennystocks":
     #     pennystocks_dict = subreddit_parse(each, subreddits[each])
     #     print(pennystocks_dict)
@@ -149,8 +149,8 @@ for each in data:
         "company": ticker_dict[each[0]]
     })
 
-print("\ndata:")
-print(organized_list)
+#print("\ndata:")
+#print(organized_list)
 
 clear_data()
 add_data(organized_list)
