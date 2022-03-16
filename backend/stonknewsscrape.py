@@ -31,9 +31,18 @@ def get_volume_info(ticker_list):
 
     volume_dict = {}
 
+    #for (columnName, columnData) in data.iteritems():
+        #print('Column Name : ', columnName)
+        #print('Column Contents : ', columnData.values)
+
     for ticker in ticker_list:
         if not math.isnan(data['Volume'][ticker][str(today)]):
-            volume_dict[ticker] = str(data['Volume'][ticker][str(today)])
+            volume_dict[ticker] = {}
+            volume_dict[ticker]['volume'] = str(data['Volume'][ticker][str(today)])
+            volume_dict[ticker]['open'] = str(data['Open'][ticker][str(today)])
+            volume_dict[ticker]['low'] = str(data['Low'][ticker][str(today)])
+            volume_dict[ticker]['high'] = str(data['High'][ticker][str(today)])
+            #volume_dict[ticker]['close'] = str(data['Close'][ticker][str(today)])
     
     return volume_dict
 
@@ -45,30 +54,34 @@ db = firebase.database()
 
 user = auth.sign_in_with_email_and_password(EMAIL, PW)
 
-URL = "https://robinhood.com/collections/100-most-popular"
+URL = "https://stonks.news/top-100/robinhood"
 page = requests.get(URL)
 
 soup = BeautifulSoup(page.content, 'html.parser')
 
-results = soup.find(id='react_root')
+table = soup.find("table")
 
-company_names = results.find_all('span', class_='_2fMBL180hIqVoxOuNVJgST')
-td_row_1 = results.find_all('td', class_='_6M0lojguuu-oGcosChSe6')
+trs = table.find_all('tr')
 
 popular = []
 
-for each in td_row_1:
-    ticker = each.find_next_sibling("td").text
-    price = each.find_next_sibling("td").find_next_sibling("td").text
-    percent_change_today = each.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text
-    market_cap = each.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text
-    popular.append({
-        "ticker": ticker,
-        "company": each.text,
-        "price": price,
-        "market_cap": market_cap,
-        "volume": -1000
-    })
+for tr in trs:
+    cols = tr.find_all('td')
+    cols = [x.text.strip() for x in cols]
+    print(cols)
+    if cols:
+        ticker = str(cols[1])
+        company = str(cols[2])
+        market_cap = str(cols[3])
+        popular.append({
+            "ticker": ticker,
+            "company": company,
+            "open": -1000,
+            "low": -1000,
+            "high": -1000,
+            "market_cap": market_cap,
+            "volume": -1000
+        })
 
 ticker_list = []
 for each in popular:
@@ -77,8 +90,10 @@ for each in popular:
 volume_data = get_volume_info(ticker_list)
 
 for each in popular:
-    if each['ticker'] in volume_data:
-        each['volume'] = volume_data[each['ticker']]
+    each['volume'] = volume_data[each['ticker']]['volume']
+    each['open'] = volume_data[each['ticker']]['open']
+    each['low'] = volume_data[each['ticker']]['low']
+    each['high'] = volume_data[each['ticker']]['high']
 
 clear_data()
 add_data(popular)
